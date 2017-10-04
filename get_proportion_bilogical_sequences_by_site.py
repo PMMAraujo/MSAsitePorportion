@@ -14,10 +14,10 @@ import pandas as pd
 # alli = AlignIO.read("aas_teste.fasta", "fasta")
 
 # Call user input of the desired multiple sequence alignement
-get_input = input("Please input sequence name: ")
+#get_input = input("Please input sequence name: ")
 
 # Pass input file to a biopython container for multiple sequence alignment
-alli = AlignIO.read(get_input, "fasta")
+#alli = AlignIO.read(get_input, "fasta")
 
 
 def Position_nucs(mutiple_alli, i):
@@ -86,14 +86,14 @@ def Nucleotides_per_site(mutiple_alli):
 
 
 # Get resuling data frame into a avariable
-Result_df = Nucleotides_per_site(alli)
+#Result_df = Nucleotides_per_site(alli)
 
 
 # Print data frame to file
-Result_df.to_csv('nucleotides_porportion_per_site.tsv', sep='\t')
+#Result_df.to_csv('nucleotides_porportion_per_site.tsv', sep='\t')
 
 
-print("Job Done")
+#print("Job Done")
 
 
 
@@ -113,15 +113,19 @@ if __name__ == '__main__':
         print("Building characters pooportion matrix and outputing the " 
         "postions above {0} conservancy "
         "treshould.".format(args.conservancy_lvl))
-        # call filtering which calls matrix contruction
+        #
         print("")
         print("Outputs: \n -Porpotion Matrix: {0}\n "
               "-Positions above threshould: {0}".format("ola"))
     elif args.conservancy_lvl == None:
         print("")
         print("Only Building characters pooportion matrix.")
-        # callc matrix contruction 
+        alli = AlignIO.read(args.input, "fasta")
+        Result_df = Nucleotides_per_site(alli)
+        Result_df.to_csv("matrix{0}.tsv".format(args.output), sep='\t')
         print("")
         print("Outputs: \n -Porpotion Matrix: {0}\n ".format("ola"))
+        print("")
+        print("Job Done")
     else:
         print("Error: invalid value for conservancy lvl")
