@@ -11,15 +11,6 @@ from Bio import AlignIO
 import pandas as pd
 import numpy as np
 
-# Open file without prompt for test purposes
-# alli = AlignIO.read("aas_teste.fasta", "fasta")
-
-# Call user input of the desired multiple sequence alignement
-#get_input = input("Please input sequence name: ")
-
-# Pass input file to a biopython container for multiple sequence alignment
-#alli = AlignIO.read(get_input, "fasta")
-
 
 def Position_nucs(mutiple_alli, i):
     """ Get the nucleotide in a single position from all the sequences in the
@@ -28,6 +19,7 @@ def Position_nucs(mutiple_alli, i):
     for record in mutiple_alli:
         nucleotides.extend(str(record.seq)[i].upper())
     return nucleotides
+
 
 def Count_invalid(nucs_in_position):
     """ Get the number of characters that are nucleotides, not ambiguos."""
@@ -81,30 +73,8 @@ def Nucleotides_per_site(mutiple_alli):
                                          'Valid nucleotides': [real_length]}))
     data.index = index
     data.index.name = "Position"
-#    df = data.sort_index(axis=1)
     return data
 
-
-# Get resuling data frame into a avariable
-#Result_df = Nucleotides_per_site(alli)
-
-
-# Print data frame to file
-#Result_df.to_csv('nucleotides_porportion_per_site.tsv', sep='\t')
-
-
-#print("Job Done")
-
-####
-# Call user input of the desired multiple sequence alignement
-#get_input = input("Please input the matrix: ")
-
-# Pass input matrix to pnda dataframe and exclude "Valid nucleotides" column
-#matrix = pd.DataFrame.from_csv(get_input, sep='\t')
-#matrix = matrix.drop(['Valid nucleotides'], axis=1)
-
-# Define threshold
-#threshold = float(input("Please difine threshould value: "))
 
 def Above_threshould(matrix, threshold):
     matrix = matrix.drop(['Valid nucleotides'], axis=1)
@@ -117,14 +87,6 @@ def Above_threshould(matrix, threshold):
             else:
                 pass
     return results
-
-#results = pd.DataFrame(np.array(Above_threshould(matrix, threshold)))
-#results.columns = ['Position', 'Chracter', 'Value']
-#results.to_csv("out_sum.csv", index=False, sep='\t')
-
-
-
-
 
 
 if __name__ == '__main__':
@@ -156,7 +118,8 @@ if __name__ == '__main__':
         results.to_csv(name_out_list, index=False, sep='\t')
         print("")
         print("Outputs: \n -Porpotion Matrix: {0}\n "
-              "-Positions above threshould: {1}".format(name_out_matrix, name_out_list))
+              "-Positions above threshould: {1}".format(name_out_matrix,
+                                                        name_out_list))
         print("")
         print("Job Done")
     elif args.conservancy_lvl == None:
