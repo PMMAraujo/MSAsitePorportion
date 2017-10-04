@@ -9,6 +9,7 @@ Created on Tue Oct  3 20:13:16 2017
 import argparse
 from Bio import AlignIO
 import pandas as pd
+import numpy as np
 
 # Open file without prompt for test purposes
 # alli = AlignIO.read("aas_teste.fasta", "fasta")
@@ -94,6 +95,36 @@ def Nucleotides_per_site(mutiple_alli):
 
 #print("Job Done")
 
+####
+# Call user input of the desired multiple sequence alignement
+#get_input = input("Please input the matrix: ")
+
+# Pass input matrix to pnda dataframe and exclude "Valid nucleotides" column
+#matrix = pd.DataFrame.from_csv(get_input, sep='\t')
+#matrix = matrix.drop(['Valid nucleotides'], axis=1)
+
+# Define threshold
+#threshold = float(input("Please difine threshould value: "))
+
+def Above_threshould(matrix, threshold):
+    matrix = matrix.drop(['Valid nucleotides'], axis=1)
+    results = []        
+    for index, row in matrix.iterrows():
+        for column in matrix:
+            value = matrix.loc[index,matrix[column].name]
+            if value >= threshold:
+                results.append([index, matrix[column].name, value])
+            else:
+                pass
+    return results
+
+#results = pd.DataFrame(np.array(Above_threshould(matrix, threshold)))
+#results.columns = ['Position', 'Chracter', 'Value']
+#results.to_csv("out_sum.csv", index=False, sep='\t')
+
+
+
+
 
 
 if __name__ == '__main__':
@@ -111,17 +142,29 @@ if __name__ == '__main__':
         print("")
         print("Building characters pooportion matrix and outputing the " 
         "postions above {0} conservancy "
-        "treshould.".format(args.conservancy_lvl))
-        #
+        "treshould.".format(args.conservancy_lvl))        
+        alli = AlignIO.read(args.input, "fasta")
+        matrix = Nucleotides_per_site(alli)
+        threshold = args.conservancy_lvl
+        above = Above_threshould(matrix, threshold)
+        results = pd.DataFrame(np.array(above))
+        results.columns = ['Position', 'Chracter', 'Value']
+        
+        name_out_matrix = "matrix_{0}.tsv".format(args.output)
+        name_out_list = "above_threshould_{0}.tsv".format(args.output)
+        matrix.to_csv(name_out_matrix, sep='\t')
+        results.to_csv(name_out_list, index=False, sep='\t')
         print("")
         print("Outputs: \n -Porpotion Matrix: {0}\n "
-              "-Positions above threshould: {0}".format("ola"))
+              "-Positions above threshould: {1}".format(name_out_matrix, name_out_list))
+        print("")
+        print("Job Done")
     elif args.conservancy_lvl == None:
         print("")
         print("Only Building characters pooportion matrix.")
         alli = AlignIO.read(args.input, "fasta")
         Result_df = Nucleotides_per_site(alli)
-        out_name = "matrix{0}.tsv".format(args.output)
+        out_name = "matrix_{0}.tsv".format(args.output)
         Result_df.to_csv(out_name, sep='\t')
         print("")
         print("Outputs: \n -Porpotion Matrix: {0}".format(out_name))
