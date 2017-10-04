@@ -25,9 +25,8 @@ def Position_nucs(mutiple_alli, i):
     multiple sequence alignment."""
     nucleotides = []
     for record in mutiple_alli:
-        nucleotides.extend(str(record.seq)[i])
+        nucleotides.extend(str(record.seq)[i].upper())
     return nucleotides
-
 
 def Count_invalid(nucs_in_position):
     """ Get the number of characters that are nucleotides, not ambiguos."""
@@ -122,9 +121,10 @@ if __name__ == '__main__':
         print("Only Building characters pooportion matrix.")
         alli = AlignIO.read(args.input, "fasta")
         Result_df = Nucleotides_per_site(alli)
-        Result_df.to_csv("matrix{0}.tsv".format(args.output), sep='\t')
+        out_name = "matrix{0}.tsv".format(args.output)
+        Result_df.to_csv(out_name, sep='\t')
         print("")
-        print("Outputs: \n -Porpotion Matrix: {0}\n ".format("ola"))
+        print("Outputs: \n -Porpotion Matrix: {0}".format(out_name))
         print("")
         print("Job Done")
     else:
