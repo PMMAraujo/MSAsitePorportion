@@ -19,27 +19,25 @@ def Position_nucs(mutiple_alli, i):
     for record in mutiple_alli:
         nucleotides.extend(str(record.seq)[i].upper())
     return nucleotides
-
-aas_list = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P',
-            'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
-
+            
+            
 def Count_invalid(nucs_in_position):
     """ Get the number of characters that are nucleotides, not ambiguos."""
-    not_nuc = set(nucs_in_position) - set(aas_list)
+    not_nuc = set(nucs_in_position) - set(characters_list)
     n_not_nuc = 0
     for i in not_nuc:
         n_not_nuc += nucs_in_position.count(i)
     return n_not_nuc
 
 
-def Count_nuc(nucs_in_position):
+
+def Count_char(nucs_in_position):
     """ Count each nucleotide prevelance in a single position of the multiple
     sequence alignment. Using "Position_nucs" and "Count_invalid" functions
     outputs."""
-    nucs_list = aas_list
     count_nucs = []
     length = len(nucs_in_position) - int(Count_invalid(nucs_in_position))
-    for nuc in nucs_list:
+    for nuc in characters_list:
         number = nucs_in_position.count(nuc)
         if int(length) == 0:
             percentage = 0
@@ -49,53 +47,33 @@ def Count_nuc(nucs_in_position):
             count_nucs.append(percentage)
     return count_nucs, length
 
-    """
-a  = {'A': [counts[0]], 'C': [counts[1]],
-                                         'D': [counts[2]], 'E': [counts[3]],
-                                         'F': [counts[4]], 'G': [counts[5]],
-                                         'H': [counts[6]], 'I': [counts[7]],
-                                         'K': [counts[8]], 'L': [counts[9]],
-                                         'M': [counts[10]], 'N': [counts[11]],
-                                         'P': [counts[12]], 'Q': [counts[13]],
-                                         'R': [counts[14]], 'S': [counts[15]],
-                                         'T': [counts[16]], 'V': [counts[17]],
-                                         'W': [counts[18]], 'Y': [counts[19]],
-                                         'Valid nucleotides': [real_length]}
-
-
-a  = {'A': [counts[0]], 'C': [counts[1]], 'D': [counts[2]], 'E': [counts[3]],
-      'F': [counts[4]], 'G': [counts[5]], 'H': [counts[6]], 'I': [counts[7]],
-      'K': [counts[8]], 'L': [counts[9]], 'M': [counts[10]], 'N': [counts[11]],
-      'P': [counts[12]], 'Q': [counts[13]], 'R': [counts[14]],
-      'S': [counts[15]], 'T': [counts[16]], 'V': [counts[17]], 
-      'W': [counts[18]], 'Y': [counts[19]], 'Valid nucleotides': [real_length]}                                       
-"""
                                          
 def Nucleotides_per_site(mutiple_alli):
     """Creates a pandas dataframe (tsv file) being each raw a position of the
-    multiple sequence alignment. Using "Count_nuc" function output"""
+    multiple sequence alignment. Using "Count_char" function output"""
     data = pd.DataFrame([])
     length_max = len(mutiple_alli[0].seq)
     index = [str(x + 1) for x in range(int(length_max))]
     for i in range(length_max):
-        counts = Count_nuc(Position_nucs(mutiple_alli, i))[0]
-        real_length = Count_nuc(Position_nucs(mutiple_alli, i))[1]
+        counts = Count_char(Position_nucs(mutiple_alli, i))[0]
+        real_length = Count_char(Position_nucs(mutiple_alli, i))[1]
         data = data.append(pd.DataFrame({'A': [counts[0]], 'C': [counts[1]],
-                                         'G': [counts[5]], 'T': [counts[16]],
+                                         'G': [counts[2]], 'T': [counts[3]],
                                          'Valid nucleotides': [real_length]}))
     data.index = index
     data.index.name = "Position"
     return data
+
     
 def Aas_per_site(mutiple_alli):
     """Creates a pandas dataframe (tsv file) being each raw a position of the
-    multiple sequence alignment. Using "Count_nuc" function output"""
+    multiple sequence alignment. Using "Count_char" function output"""
     data = pd.DataFrame([])
     length_max = len(mutiple_alli[0].seq)
     index = [str(x + 1) for x in range(int(length_max))]
     for i in range(length_max):
-        counts = Count_nuc(Position_nucs(mutiple_alli, i))[0]
-        real_length = Count_nuc(Position_nucs(mutiple_alli, i))[1]
+        counts = Count_char(Position_nucs(mutiple_alli, i))[0]
+        real_length = Count_char(Position_nucs(mutiple_alli, i))[1]
         data = data.append(pd.DataFrame({'A': [counts[0]], 'C': [counts[1]],
                                          'D': [counts[2]], 'E': [counts[3]],
                                          'F': [counts[4]], 'G': [counts[5]],
@@ -124,29 +102,44 @@ def Above_threshould(matrix, threshold):
                 pass
     return results
 
-
+    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-i","--input", required = True,
                         help="name of the input file in fasta")
     parser.add_argument("-o","--output", default = "output", type = str,
                         help="name of the input file in fasta")
-    parser.add_argument("-a", "--aminoacids", action="store_true",
-                        help="input in aas")
-    parser.add_argument("-n", "--nucleotides", action="store_false",
-                        help="input in nucleotides")
+    parser.add_argument("-n", "--nucleotides", action="store_true",
+                        help="input in nucleotides - defaut is in aminoacids")
     parser.add_argument("-c", "--conservancy_lvl", type = float,
                         help="lvl of conservancy desired for the outputs")
 
     args = parser.parse_args()
     
+# Based on datatype (option -n) decide use function to use to build the matrix
+    if args.nucleotides == True:
+        print("")
+        print("Data type: Nucleotides")
+        alli = AlignIO.read(args.input, "fasta")
+        print("Building characters poportion matrix.")
+        characters_list = ['A', 'C', 'G', 'T']
+        matrix = Nucleotides_per_site(alli)
+    elif args.nucleotides == False:
+        print("")
+        print("Data type: Aminoacids")   
+        alli = AlignIO.read(args.input, "fasta")
+        print("Building characters pooportion matrix.")
+        characters_list = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
+                           'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+        matrix = Aas_per_site(alli)
+    else:
+        print("Error: could not understand type of data option (-n).")
+      
+# If threshould if difined a list above treshould is outputed with the matrix       
     if args.conservancy_lvl != None:
         print("")
-        print("Building characters pooportion matrix and outputing the " 
-        "postions above {0} conservancy "
+        print("Outputing the postions above {0} conservancy "
         "treshould.".format(args.conservancy_lvl))        
-        alli = AlignIO.read(args.input, "fasta")
-        matrix = Nucleotides_per_site(alli)
         threshold = args.conservancy_lvl
         above = Above_threshould(matrix, threshold)
         results = pd.DataFrame(np.array(above))
@@ -163,12 +156,8 @@ if __name__ == '__main__':
         print("")
         print("Job Done")
     elif args.conservancy_lvl == None:
-        print("")
-        print("Only Building characters pooportion matrix.")
-        alli = AlignIO.read(args.input, "fasta")
-        Result_df = Nucleotides_per_site(alli)
         out_name = "matrix_{0}.tsv".format(args.output)
-        Result_df.to_csv(out_name, sep='\t')
+        matrix.to_csv(out_name, sep='\t')
         print("")
         print("Outputs: \n -Porpotion Matrix: {0}".format(out_name))
         print("")

@@ -4,7 +4,7 @@ Created on Thu Oct  5 15:09:03 2017
 
 @author: Araujo
 """
-
+import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -12,20 +12,28 @@ if __name__ == '__main__':
                         help="name of the input file in fasta")
     parser.add_argument("-o","--output", default = "output", type = str,
                         help="name of the input file in fasta")
-    parser.add_argument("-a", "--aminoacids", action="store_true",
-                        help="input in aas")
-    parser.add_argument("-n", "--nucleotides", action="store_false",
-                        help="input in nucleotides")
+    parser.add_argument("-n", "--nucleotides", action="store_true",
+                        help="input in nucleotides - defaut is in aminoacids")
     parser.add_argument("-c", "--conservancy_lvl", type = float,
                         help="lvl of conservancy desired for the outputs")
 
     args = parser.parse_args()
+
+    if args.nucleotides == True:
+        print("nucleotides")
+    else:
+        print("aminoacids")
     
+    
+    
+    
+"""    
     if args.conservancy_lvl != None:
         print("")
         print("Building characters pooportion matrix and outputing the " 
         "postions above {0} conservancy "
-        "treshould.".format(args.conservancy_lvl))        
+        "treshould.".format(args.conservancy_lvl))
+        
         alli = AlignIO.read(args.input, "fasta")
         matrix = Nucleotides_per_site(alli)
         threshold = args.conservancy_lvl
@@ -56,3 +64,5 @@ if __name__ == '__main__':
         print("Job Done")
     else:
         print("Error: invalid value for conservancy lvl")
+        
+"""
