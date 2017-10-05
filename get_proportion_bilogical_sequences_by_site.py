@@ -20,12 +20,12 @@ def Position_nucs(mutiple_alli, i):
         nucleotides.extend(str(record.seq)[i].upper())
     return nucleotides
 
+aas_list = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P',
+            'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
 
 def Count_invalid(nucs_in_position):
     """ Get the number of characters that are nucleotides, not ambiguos."""
-    not_nuc = set(nucs_in_position) - set(['A', 'C', 'D', 'E', 'F', 'G', 'H',
-                                           'I', 'K', 'L', 'M', 'N', 'P', 'Q',
-                                           'R', 'S', 'T', 'V', 'W', 'Y'])
+    not_nuc = set(nucs_in_position) - set(aas_list)
     n_not_nuc = 0
     for i in not_nuc:
         n_not_nuc += nucs_in_position.count(i)
@@ -36,8 +36,7 @@ def Count_nuc(nucs_in_position):
     """ Count each nucleotide prevelance in a single position of the multiple
     sequence alignment. Using "Position_nucs" and "Count_invalid" functions
     outputs."""
-    nucs_list = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N',
-                 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+    nucs_list = aas_list
     count_nucs = []
     length = len(nucs_in_position) - int(Count_invalid(nucs_in_position))
     for nuc in nucs_list:
@@ -50,8 +49,45 @@ def Count_nuc(nucs_in_position):
             count_nucs.append(percentage)
     return count_nucs, length
 
+    """
+a  = {'A': [counts[0]], 'C': [counts[1]],
+                                         'D': [counts[2]], 'E': [counts[3]],
+                                         'F': [counts[4]], 'G': [counts[5]],
+                                         'H': [counts[6]], 'I': [counts[7]],
+                                         'K': [counts[8]], 'L': [counts[9]],
+                                         'M': [counts[10]], 'N': [counts[11]],
+                                         'P': [counts[12]], 'Q': [counts[13]],
+                                         'R': [counts[14]], 'S': [counts[15]],
+                                         'T': [counts[16]], 'V': [counts[17]],
+                                         'W': [counts[18]], 'Y': [counts[19]],
+                                         'Valid nucleotides': [real_length]}
 
+
+a  = {'A': [counts[0]], 'C': [counts[1]], 'D': [counts[2]], 'E': [counts[3]],
+      'F': [counts[4]], 'G': [counts[5]], 'H': [counts[6]], 'I': [counts[7]],
+      'K': [counts[8]], 'L': [counts[9]], 'M': [counts[10]], 'N': [counts[11]],
+      'P': [counts[12]], 'Q': [counts[13]], 'R': [counts[14]],
+      'S': [counts[15]], 'T': [counts[16]], 'V': [counts[17]], 
+      'W': [counts[18]], 'Y': [counts[19]], 'Valid nucleotides': [real_length]}                                       
+"""
+                                         
 def Nucleotides_per_site(mutiple_alli):
+    """Creates a pandas dataframe (tsv file) being each raw a position of the
+    multiple sequence alignment. Using "Count_nuc" function output"""
+    data = pd.DataFrame([])
+    length_max = len(mutiple_alli[0].seq)
+    index = [str(x + 1) for x in range(int(length_max))]
+    for i in range(length_max):
+        counts = Count_nuc(Position_nucs(mutiple_alli, i))[0]
+        real_length = Count_nuc(Position_nucs(mutiple_alli, i))[1]
+        data = data.append(pd.DataFrame({'A': [counts[0]], 'C': [counts[1]],
+                                         'G': [counts[5]], 'T': [counts[16]],
+                                         'Valid nucleotides': [real_length]}))
+    data.index = index
+    data.index.name = "Position"
+    return data
+    
+def Aas_per_site(mutiple_alli):
     """Creates a pandas dataframe (tsv file) being each raw a position of the
     multiple sequence alignment. Using "Count_nuc" function output"""
     data = pd.DataFrame([])
@@ -94,7 +130,11 @@ if __name__ == '__main__':
     parser.add_argument("-i","--input", required = True,
                         help="name of the input file in fasta")
     parser.add_argument("-o","--output", default = "output", type = str,
-                        help="name of the input file in fasta")    
+                        help="name of the input file in fasta")
+    parser.add_argument("-a", "--aminoacids", action="store_true",
+                        help="input in aas")
+    parser.add_argument("-n", "--nucleotides", action="store_false",
+                        help="input in nucleotides")
     parser.add_argument("-c", "--conservancy_lvl", type = float,
                         help="lvl of conservancy desired for the outputs")
 
