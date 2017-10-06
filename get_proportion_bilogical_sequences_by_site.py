@@ -5,7 +5,6 @@ Created on Tue Oct  3 20:13:16 2017
 @author: Araujo
 """
 
-
 import argparse
 from Bio import AlignIO
 import pandas as pd
@@ -29,7 +28,6 @@ def Count_invalid(nucs_in_position):
     for i in not_nuc:
         n_not_nuc += nucs_in_position.count(i)
     return n_not_nuc
-
 
 
 def Count_char(nucs_in_position):
@@ -124,7 +122,7 @@ if __name__ == '__main__':
                         "filtering.")
     args = parser.parse_args()
     
-# Based on datatype (option -n) decide use function to use to build the matrix
+# Based on datatype (option -n) decide which function to use to build the matrix
     if args.nucleotides == True:
         print("")
         print("Data type: Nucleotides")
@@ -141,7 +139,7 @@ if __name__ == '__main__':
                            'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
         matrix = Aas_per_site(alli)
     else:
-        print("Error: could not understand type of data option (-n).")
+        print("Error: could not understand data type option (-n).")
       
 # If threshould if difined a list above treshould is outputed with the matrix       
     if args.conservancy_lvl != None:
@@ -172,3 +170,4 @@ if __name__ == '__main__':
         print("Job Done")
     else:
         print("Error: invalid value for conservancy lvl")
+        
