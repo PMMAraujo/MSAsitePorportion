@@ -12,9 +12,9 @@ import pandas as pd
 import numpy as np
 
 
-def Position_nucs(mutiple_alli, i):
-    """ Get the nucleotide in a single position from all the sequences in the
-    multiple sequence alignment."""
+def This_pos_chars(mutiple_alli, i):
+    """ Get the characters (nucleotides or aminoacids) in a single position 
+    from all the sequences in the multiple sequence alignment."""
     nucleotides = []
     for record in mutiple_alli:
         nucleotides.extend(str(record.seq)[i].upper())
@@ -22,7 +22,8 @@ def Position_nucs(mutiple_alli, i):
             
             
 def Count_invalid(nucs_in_position):
-    """ Get the number of characters that are nucleotides, not ambiguos."""
+    """ Count number of characters that are invalid: gaps, ambiguities or 
+    strange characters."""
     not_nuc = set(nucs_in_position) - set(characters_list)
     n_not_nuc = 0
     for i in not_nuc:
@@ -32,9 +33,9 @@ def Count_invalid(nucs_in_position):
 
 
 def Count_char(nucs_in_position):
-    """ Count each nucleotide prevelance in a single position of the multiple
-    sequence alignment. Using "Position_nucs" and "Count_invalid" functions
-    outputs."""
+    """ Count each character (20 structural aas or 4 nucleotides) prevelance 
+    in a single position of the multiple sequence alignment. Using 
+    "This_pos_chars" and "Count_invalid" functions outputs."""
     count_nucs = []
     length = len(nucs_in_position) - int(Count_invalid(nucs_in_position))
     for nuc in characters_list:
@@ -49,14 +50,15 @@ def Count_char(nucs_in_position):
 
                                          
 def Nucleotides_per_site(mutiple_alli):
-    """Creates a pandas dataframe (tsv file) being each raw a position of the
-    multiple sequence alignment. Using "Count_char" function output"""
+    """Creates a pandas dataframe (tsv file) being each row a position of the
+    multiple sequence alignment, and each column a nucleotide.
+    Using "Count_char" function output"""
     data = pd.DataFrame([])
     length_max = len(mutiple_alli[0].seq)
     index = [str(x + 1) for x in range(int(length_max))]
     for i in range(length_max):
-        counts = Count_char(Position_nucs(mutiple_alli, i))[0]
-        real_length = Count_char(Position_nucs(mutiple_alli, i))[1]
+        counts = Count_char(This_pos_chars(mutiple_alli, i))[0]
+        real_length = Count_char(This_pos_chars(mutiple_alli, i))[1]
         data = data.append(pd.DataFrame({'A': [counts[0]], 'C': [counts[1]],
                                          'G': [counts[2]], 'T': [counts[3]],
                                          'Valid nucleotides': [real_length]}))
@@ -66,14 +68,15 @@ def Nucleotides_per_site(mutiple_alli):
 
     
 def Aas_per_site(mutiple_alli):
-    """Creates a pandas dataframe (tsv file) being each raw a position of the
-    multiple sequence alignment. Using "Count_char" function output"""
+    """Creates a pandas dataframe (tsv file) being each row a position of the
+    multiple sequence alignment, and each column an aminoacid. Using 
+    "Count_char" function output"""
     data = pd.DataFrame([])
     length_max = len(mutiple_alli[0].seq)
     index = [str(x + 1) for x in range(int(length_max))]
     for i in range(length_max):
-        counts = Count_char(Position_nucs(mutiple_alli, i))[0]
-        real_length = Count_char(Position_nucs(mutiple_alli, i))[1]
+        counts = Count_char(This_pos_chars(mutiple_alli, i))[0]
+        real_length = Count_char(This_pos_chars(mutiple_alli, i))[1]
         data = data.append(pd.DataFrame({'A': [counts[0]], 'C': [counts[1]],
                                          'D': [counts[2]], 'E': [counts[3]],
                                          'F': [counts[4]], 'G': [counts[5]],
@@ -91,6 +94,10 @@ def Aas_per_site(mutiple_alli):
 
 
 def Above_threshould(matrix, threshold):
+    """ In case of a threshould being specified ( option "-c") this function
+    creates a list of all the characters with proportion above threshould
+    for its alignment position. Starts from "Aas_per_site" or 
+    "Nucleotides_per_site" function outputs."""
     matrix = matrix.drop(['Valid nucleotides'], axis=1)
     results = []        
     for index, row in matrix.iterrows():
@@ -106,14 +113,15 @@ def Above_threshould(matrix, threshold):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-i","--input", required = True,
-                        help="name of the input file in fasta")
+                        help="Name of the input file, in fasta format only.")
     parser.add_argument("-o","--output", default = "output", type = str,
-                        help="name of the input file in fasta")
+                        help="Prefix for the name of the output files.")
     parser.add_argument("-n", "--nucleotides", action="store_true",
-                        help="input in nucleotides - defaut is in aminoacids")
+                        help="Use when input is a nucleotides MSA - defaut "
+                        "is in aminoacids.")
     parser.add_argument("-c", "--conservancy_lvl", type = float,
-                        help="lvl of conservancy desired for the outputs")
-
+                        help="Lvl of conservancy desired for the outputs "
+                        "filtering.")
     args = parser.parse_args()
     
 # Based on datatype (option -n) decide use function to use to build the matrix
